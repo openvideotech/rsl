@@ -1,8 +1,8 @@
-# Revenue Sharing Markup Language (RSML)
+# Revenue Sharing Language (RSL)
 
-*Status: v0.4, draft specification, open for review.*
+*Status: v0.5, draft specification, open for review.*
 
-RSML is a suggested syntax for describing revenue sharing agreements between multiple parties using [YAML](https://yaml.org/). 
+RSL is a proposed syntax for describing revenue sharing agreements between multiple parties using [YAML](https://yaml.org/). 
 
 A standard Syntax is first proposed below with either fixed or percentage payout splits in a potentially unlimited series of steps. The payments in each step must be complete before moving onto the next step – which for percentage payouts can be based on a cap. 
 
@@ -10,14 +10,14 @@ Beneath that is an additional, less complete, Variable Syntax with {{double-brac
 
 ### Why is this needed?
 
-Revenue Sharing Markup Language (RSML) follows the idea of a [Ricardian Contract](https://en.wikipedia.org/wiki/Ricardian_contract), which is a machine- and human- readable agreement. A Ricardian Contract for revenue sharing has the advantages of potentially reducing human error, mispayments, delays or 'creative adjustments' when an agreement is paid out. RSML is proposed as a common set of instructions that can be generated and processed when creating multistep recoupment and profit-share agreements. 
+Revenue Sharing Modeling Language (RSL) is inspired by the idea of a [Ricardian Contract](https://en.wikipedia.org/wiki/Ricardian_contract), which is a machine- and human- readable agreement. A Ricardian Contract for revenue sharing has the advantages of potentially reducing human error, mispayments, delays or 'creative adjustments' when an agreement is paid out. RSL is proposed as a common set of instructions that can be generated and processed when creating multistep recoupment and profit-share agreements. 
 
-A RSML agreement can be hashed, ensuring future changes can be spotted and that errors/mispayments are limited to the software implementing the agreement. Where this software is operated by a party independent of the agreement, it could give further confidence of accurate payouts.
+A RSL agreement can be hashed, ensuring future changes can be spotted and that errors/mispayments are limited to the software implementing the agreement. Where this software is operated by a party independent of the agreement, it could give further confidence of accurate payouts.
 :::
 
-## RSML Standard Syntax
+## RSL Standard Syntax
 
-An RSML agreement features three components:
+An RSL agreement features three components:
  - Data for the whole **Agreement**, which appears once, and of which only Name and Currency is required.
  - Data for a **Step** in the agreement which can appear multiple times, and of which only Type (fixed or percentage) is required. A step will contain one or more Payees.
  - Data for a **Payee**, who can  appear multiple times per step, and of which only wallet is required.
@@ -107,7 +107,7 @@ steps:
       - [ "Unicef", $ilp.example.org/unicef, ilp, 100 ]
 ```
 
-## RSML Variable Syntax 
+## RSL Variable Syntax 
 
 Variable Syntax uses {{double -curly bracketed values}} in a contract, which will change after a revenue share agreement is first created. For instance annual expenses which must be deducted before profits are shared; or cooperative members when new members are joining all the time. 
 
