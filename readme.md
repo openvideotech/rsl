@@ -1,6 +1,6 @@
 # Revenue Sharing Language (RSL)
 
-*Status: v0.5, draft specification, open for review.*
+*Status: v0.6, draft specification, open for review.*
 
 RSL is a proposed syntax for describing revenue sharing agreements between multiple parties using [YAML](https://yaml.org/). 
 
@@ -26,6 +26,8 @@ An RSL agreement features three components:
 ### Data for the agreement
 - **Name**: 256 chars max - *REQUIRED*.
 - **Currency**: (three letter [ISO currency](https://en.wikipedia.org/wiki/ISO_4217) or [crypto](https://www.finder.com.au/cryptocurrency/altcoins) code) - *REQUIRED*.
+- **Decimals**: comma (,), period (.) or none. Determines if decimal places in currency ammounts are denoted with '.' or ',' or (as is the case with currencies such as Yen) no decimal places. If not set, period (.) is assumed.
+- **RSL version**: which RSL version is used (e.g. 0.6). This allows for future changes in RSL syntax to not break on older RSL files.
 - **Description**.
 - **Period**: When does the agreement reset? If not set is assumed to run indefinitely, or until the end date. Takes form of '10 transactions', '1 year', '4 weeks', etc, made up of:
 	- A positive integer;
@@ -58,9 +60,11 @@ An author signs a deal for 25% of net sales (with 10% to her agent) after a £10
 ```
 ---
 name: "Best of times, Worst of times"
+rsl version: 1.0
 description: "Book deal for the new novel by Charlene Dickens"
 url: example.com/248mc0u3489mc
 currency: GBP
+decimals: period
 steps:
   -
     type: fixed
@@ -80,12 +84,14 @@ After paying their record label and producer, band members split income from the
 ```
 ---  
 name: “Abi's Road”  
+rsl version: 1.0
 description: “Record deal for the band Be At Less”
 url: beatless.example.com/deal
 pointer: $ilp.example.com/pN3K3rKULNQh
 contact: Big Lawyers Inc.
 email: big.lawyers@example.com
 currency: EUR
+decimals: comma
 steps:
   -
     type: fixed  
@@ -127,7 +133,8 @@ A filmmaker allows anyone embedding their film to take 20% of Web Monetization, 
 
 ```
 ---  
-name: “Film distribution share”  
+name: “Film distribution share”
+rsl version: 1.0
 description: “Profit share for video embeds”
 url: ilp.example.com/name
 currency: USD
@@ -152,7 +159,8 @@ Following on from the above example; when the filmmaker receives income from web
 
 ```
 ---  
-name: “Film income share”  
+name: “Film income share”
+rsl version: 1.0
 description: “Profit share for feature film”
 url: $example.com/celia
 currency: USD
@@ -188,6 +196,7 @@ A group of filmmakers have setup a film studio cooperative  (with apologies to [
 ```
 ---  
 name: “Artists United”  
+rsl version: 1.0
 description: “Founding agreement for film studio coop”
 url: deal.example.com
 pointer: $ilp.example.com/pN3K3rKULNQh
@@ -222,8 +231,10 @@ A charity helps developers give coding lessons in refugee camps around the world
 ```
 ---  
 name: “Dev Camp”  
+rsl version: 1.0
 description: “Profit share for trainee developers”
-currency: INR
+currency: JPY
+decimals: none
 period: 1 transaction
 steps:
   - 
@@ -244,7 +255,7 @@ steps:
 
 **Copyright & Disclaimer**
 
-Copyright © 2021 Netribution Ltd, Nicol Wistreich under a [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/). With thanks to Rich Lott, Aidan Saunders & Silvia Schmidt.
+Copyright © 2021 Nicol Wistreich under a [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/). With thanks to Rich Lott, Mark Boas, Aidan Saunders & Silvia Schmidt.
 
 THIS WORK IS PROVIDED "AS IS," AND COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO, WARRANTIES OF FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SYSTEM OR DOCUMENT WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
 
