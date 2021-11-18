@@ -1,6 +1,6 @@
 # Revenue Sharing Language (RSL)
 
-*Status: v0.6, draft specification, open for review.*
+*Status: v0.7, draft specification, open for review.*
 
 RSL is a proposed syntax for describing revenue sharing agreements between multiple parties using [YAML](https://yaml.org/). 
 
@@ -27,17 +27,18 @@ An RSL agreement features three components:
 - **Name**: 256 chars max - *REQUIRED*.
 - **Currency**: (three letter [ISO currency](https://en.wikipedia.org/wiki/ISO_4217) or [crypto](https://www.finder.com.au/cryptocurrency/altcoins) code) - *REQUIRED*.
 - **Decimals**: comma (,), period (.) or none. Determines if decimal places in currency ammounts are denoted with '.' or ',' or (as is the case with currencies such as Yen) no decimal places. If not set, period (.) is assumed.
-- **RSL version**: which RSL version is used (e.g. 0.6). This allows for future changes in RSL syntax to not break on older RSL files.
+- **RSL**: which RSL version is used (e.g. 0.6). This allows for future changes in RSL syntax to not break on older RSL files.
 - **Description**.
 - **Period**: When does the agreement reset? If not set is assumed to run indefinitely, or until the end date. Takes form of '10 transactions', '1 year', '4 weeks', etc, made up of:
 	- A positive integer;
-    - An interval, either 'transaction' sich as per donation, sale or membership; or time period such as day, month, year, etc
+	- An interval, either 'transaction' sich as per donation, sale or membership; or time period such as day, month, year, etc
 - **Starts**: a starting date for the agreement (YYYY-MM-DD), e.g. 2021-12-31. This can be used with Term to match financial reporting periods.
 - **Ends**: an end date, which allows for a fixed period agreement to stop. 
 - **Pointer**: following the idea of [Payment Pointers](https://paymentpointers.org/), this references a wallet, bank account, collecting society or escrow account that will receive the initial funds this agreement relates to. 
 - **URL**: A public address for the agreement.
 - **Contact**: Contact name for the agreement.
 - **Email**: Email address for the contact.
+- **Jurisdiction**: Legal jurisdiction for the agreement, ie which country the agreement is operated from / answerable to. Could be country, region or state.
 - **Steps**: An array of steps
 
 ### Data for a step in the agreement, numbered sequentially:
@@ -84,7 +85,7 @@ After paying their record label and producer, band members split income from the
 ```
 ---  
 name: “Abi's Road”  
-rsl version: 1.0
+rsl: 1.0
 description: “Record deal for the band Be At Less”
 url: beatless.example.com/deal
 pointer: $ilp.example.com/pN3K3rKULNQh
@@ -134,11 +135,12 @@ A filmmaker allows anyone embedding their film to take 20% of Web Monetization, 
 ```
 ---  
 name: “Film distribution share”
-rsl version: 1.0
+rsl: 1.0
 description: “Profit share for video embeds”
 url: ilp.example.com/name
 currency: USD
 period: 1 transaction
+jurisdiction: California, USA
 steps:
   -
     type: percent
@@ -160,11 +162,12 @@ Following on from the above example; when the filmmaker receives income from web
 ```
 ---  
 name: “Film income share”
-rsl version: 1.0
+rsl: 1.0
 description: “Profit share for feature film”
 url: $example.com/celia
 currency: USD
 contact: Celia Bee Da'mil
+jurisdiction: California, USA
 steps:
   - 
     type: fixed
@@ -196,7 +199,7 @@ A group of filmmakers have setup a film studio cooperative  (with apologies to [
 ```
 ---  
 name: “Artists United”  
-rsl version: 1.0
+rsl: 1.0
 description: “Founding agreement for film studio coop”
 url: deal.example.com
 pointer: $ilp.example.com/pN3K3rKULNQh
@@ -231,7 +234,7 @@ A charity helps developers give coding lessons in refugee camps around the world
 ```
 ---  
 name: “Dev Camp”  
-rsl version: 1.0
+rsl: 1.0
 description: “Profit share for trainee developers”
 currency: JPY
 decimals: none
