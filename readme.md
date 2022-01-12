@@ -1,8 +1,18 @@
 # Revenue Sharing Language (RSL)
 
-*Status: v0.7, draft specification, open for review.*
+*v0.8*
 
 RSL is a proposed syntax for describing revenue sharing agreements between multiple parties using [YAML](https://yaml.org/). 
+
+Revenue Sharing Language (RSL) is inspired by Ian Grigg's idea of a [Ricardian Contract](https://en.wikipedia.org/wiki/Ricardian_contract), which is a machine- and human- readable agreement. A Ricardian Contract for revenue sharing has the advantages of potentially reducing human error, mispayments, delays or 'creative adjustments' when an agreement is paid out. So RSL is proposed as a common set of instructions that can be generated and processed when creating multi-step recoupment and profit-share agreements. 
+
+One of the main benefits of a human and machine readable contract is that a cryptographic [SHA hash](https://en.wikipedia.org/wiki/SHA-1) can be generated from it, which would alter if the agreement is changed. This can act as a check against unagreed changes - aka ['Hollywood accounting'](https://en.wikipedia.org/wiki/Hollywood_accounting) so a system using the machine instructions from such a contract for royalty or revenue-share payouts can check it's the same agreement as the one originally agreed to. But this is why machine-readable (aka 'smart contract') alone isn't sufficient - non-developer humans should be able to read the agreement and understand its rules. For this reason [YAML](https://yaml.org/) was chosen over JSON because while it has limitations, it is more easily readable by non-developers.
+
+RSL forms the basis of the Javascript libraries Cascade, Waterfall and the CiviCRM extension suite CiviSplit for Backdrop, Drupal, Joomla! and WordPress.
+
+The syntax has two levels:
+ - **a Standard Syntax**, to describe a potentially unlimited series of steps of fixed, percentage or ratio splits, which can loop by both time period or per transaction. This has been implemented in three projects.
+ - **an expeerimental Variable Syntax**, still a draft, and not yet implemented, which allows for variables defined elsewhere, for instance an external value for expenses, that allows to exist between certain levels.
 
 A standard Syntax is first proposed below with either fixed or percentage payout splits in a potentially unlimited series of steps. The payments in each step must be complete before moving onto the next step – which for percentage payouts can be based on a cap. 
 
@@ -15,13 +25,12 @@ Revenue Sharing Modeling Language (RSL) is inspired by the idea of a [Ricardian 
 A RSL agreement can be hashed, ensuring future changes can be spotted and that errors/mispayments are limited to the software implementing the agreement. Where this software is operated by a party independent of the agreement, it could give further confidence of accurate payouts.
 :::
 
-## RSL Standard Syntax
+## RSL Standard Syntax (release candidate)
 
 An RSL agreement features three components:
  - Data for the whole **Agreement**, which appears once, and of which only Name and Currency is required.
- - Data for a **Step** in the agreement which can appear multiple times, and of which only Type (fixed or percentage) is required. A step will contain one or more Payees.
- - Data for a **Payee**, who can  appear multiple times per step, and of which only wallet is required.
-
+ - Data for a **Step** in the agreement which can appear multiple times, and of which only Type (fixed, ratio or percentage) is required. A step will contain one or more Payees.
+ - Data for a **Payee**, who can  appear multiple times per step, and of which only amount and wallet is required.
 
 ### Data for the agreement
 - **Name**: 256 chars max - *REQUIRED*.
@@ -42,13 +51,13 @@ An RSL agreement features three components:
 - **Steps**: An array of steps
 
 ### Data for a step in the agreement, numbered sequentially:
-- **Type**:  fixed or percent - *REQUIRED*.
+- **Type**:  fixed, ratio or percent - *REQUIRED*.
 - **Description**:
 - **Cap**: for percentage payouts, a max payout before moving to the next step. ‘null’, or unset indicates distribution runs indefinitely.
 - **Payee**: an array for payees, containing:
 	- **name**;
 	- **pointer**: [Payment pointer](https://paymentpointers.org/), bank account/sortcode, IBAN, Swift, email, dbse ID, etc) - *REQUIRED*;
-	- **amount**. If fixed this is the fee, if percentage this is the share - required.
+	- **amount**: If fixed this is the fee, if percentage this is a number with max two decimals places, if ratio this is an integer (e.g. '1' and '2' for a one-third/two-thirds split between two payees)- required.
 	- **type** (describes the nature of the pointer, e.g. ILP, AC/sort, Wise, Stripe, Paypal, Ref, ID)
 
 ### Notes:
@@ -114,7 +123,7 @@ steps:
       - [ "Unicef", $ilp.example.org/unicef, ilp, 100 ]
 ```
 
-## RSL Variable Syntax 
+## RSL Variable Syntax (draft)
 
 Variable Syntax uses {{double -curly bracketed values}} in a contract, which will change after a revenue share agreement is first created. For instance annual expenses which must be deducted before profits are shared; or cooperative members when new members are joining all the time. 
 
@@ -130,7 +139,7 @@ As well as allowing for {{double bracketed}} reference points which can be chang
 	- {{name_of_group.type}}
 
 ### Example 3
-A filmmaker allows anyone embedding their film to take 20% of Web Monetization, donations and pay-per-view fees, after the cost of video streaming and a carbon footprint offset. 
+A filmmaker allows anyone embedding their film to take 20% of Web Monetization, donations and pay-per-view fees, after the cost of video streaming and a carbon footprint offset, which are split 3:4. 
 
 ```
 ---  
@@ -143,11 +152,11 @@ period: 1 transaction
 jurisdiction: California, USA
 steps:
   -
-    type: percent
+    type: ratio
     cap: 0.30
     payee:
-      - [ "Streaming costs", $fee.example.com, ilp, 50]
-      - [ "Ocean forest restoration", $offset.example.com, ilp, 50]
+      - [ "Streaming costs", $fee.example.com, ilp, 3]
+      - [ "Ocean forest restoration", $offset.example.com, ilp, 4]
   -
     type: percent
     endpoint: celiafilm.example.com
@@ -258,7 +267,7 @@ steps:
 
 **Copyright & Disclaimer**
 
-Copyright © 2021 Nicol Wistreich under a [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/). With thanks to Rich Lott, Mark Boas, Aidan Saunders & Silvia Schmidt.
+Copyright © 2021 Nicol Wistreich under a [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/). With thanks to Rich Lott, Mark Boas, Aidan Saunders, Matthew Wire & Silvia Schmidt.
 
 THIS WORK IS PROVIDED "AS IS," AND COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO, WARRANTIES OF FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SYSTEM OR DOCUMENT WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
 
