@@ -51,13 +51,13 @@ An RSL agreement features three components:
 - **Steps**: An array of steps
 
 ### Data for a step in the agreement, numbered sequentially:
-- **Type**:  fixed, ratio or percent - *REQUIRED*.
+- **Type**:  fixed, percent or ratio. Ratios are an alternative to percent, helpful for splits with recurring decimals when expressed as a % - *REQUIRED*.
 - **Description**:
 - **Cap**: for percentage payouts, a max payout before moving to the next step. ‘null’, or unset indicates distribution runs indefinitely.
 - **Payee**: an array for payees, containing:
 	- **name**;
 	- **pointer**: [Payment pointer](https://paymentpointers.org/), bank account/sortcode, IBAN, Swift, email, dbse ID, etc) - *REQUIRED*;
-	- **amount**: If fixed this is the fee, if percentage this is a number with max two decimals places, if ratio this is an integer (e.g. '1' and '2' for a one-third/two-thirds split between two payees)- required.
+	- **amount**: If fixed this is the fee, if percentage it is the mount (without a percentage symbol). Ratios are expressed only as the numerator (ie '1' for an equal 3-way split) - required.
 	- **type** (describes the nature of the pointer, e.g. ILP, AC/sort, Wise, Stripe, Paypal, Ref, ID)
 
 ### Notes:
