@@ -14,17 +14,6 @@ The syntax has two levels:
  - **a Standard Syntax**, to describe a potentially unlimited series of steps of fixed, percentage or ratio splits, which can loop by both time period or per transaction. This has been implemented in three projects.
  - **an expeerimental Variable Syntax**, still a draft, and not yet implemented, which allows for variables defined elsewhere, for instance an external value for expenses, that allows to exist between certain levels.
 
-A standard Syntax is first proposed below with either fixed or percentage payout splits in a potentially unlimited series of steps. The payments in each step must be complete before moving onto the next step – which for percentage payouts can be based on a cap. 
-
-Beneath that is an additional, less complete, Variable Syntax with {{double-bracketed pointers}} to reference values taken from other sources, such as an expense total or an interest rate.
-
-### Why is this needed?
-
-Revenue Sharing Modeling Language (RSL) is inspired by the idea of a [Ricardian Contract](https://en.wikipedia.org/wiki/Ricardian_contract), which is a machine- and human- readable agreement. A Ricardian Contract for revenue sharing has the advantages of potentially reducing human error, mispayments, delays or 'creative adjustments' when an agreement is paid out. RSL is proposed as a common set of instructions that can be generated and processed when creating multistep recoupment and profit-share agreements. 
-
-A RSL agreement can be hashed, ensuring future changes can be spotted and that errors/mispayments are limited to the software implementing the agreement. Where this software is operated by a party independent of the agreement, it could give further confidence of accurate payouts.
-:::
-
 ## RSL Standard Syntax (release candidate)
 
 An RSL agreement features three components:
