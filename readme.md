@@ -4,15 +4,15 @@
 
 RSL is a proposed syntax for describing revenue sharing agreements between multiple parties using [YAML](https://yaml.org/). 
 
-Revenue Sharing Language (RSL) is inspired by Ian Grigg's idea of a [Ricardian Contract](https://en.wikipedia.org/wiki/Ricardian_contract), which is a machine- and human- readable agreement. A Ricardian Contract for revenue sharing has the advantages of potentially reducing human error, mispayments, delays or 'creative adjustments' when an agreement is paid out. So RSL is proposed as a common set of instructions that can be generated and processed when creating multi-step recoupment and profit-share agreements. 
+Revenue Sharing Language (RSL) is inspired by Ian Grigg's idea of a [Ricardian Contract](https://en.wikipedia.org/wiki/Ricardian_contract), which is a machine- and human- readable agreement. A Ricardian Contract for revenue sharing has the advantages of potentially reducing human error, delays or 'creative adjustments' when an agreement is paid out. RSL is proposed as a common set of instructions that can be generated and processed when creating multi-step recoupment and profit-share agreements. 
 
-One of the main benefits of a human and machine readable contract is that a cryptographic [SHA hash](https://en.wikipedia.org/wiki/SHA-1) can be generated from it, which would alter if the agreement is changed. This can act as a check against unagreed changes - aka ['Hollywood accounting'](https://en.wikipedia.org/wiki/Hollywood_accounting) so a system using the machine instructions from such a contract for royalty or revenue-share payouts can check it's the same agreement as the one originally agreed to. But this is why machine-readable (aka 'smart contract') alone isn't sufficient - non-developer humans should be able to read the agreement and understand its rules. For this reason [YAML](https://yaml.org/) was chosen over JSON because while it has limitations, it is more easily readable by non-developers.
+One of the main benefits of a human and machine readable contract is that a cryptographic [SHA hash](https://en.wikipedia.org/wiki/SHA-1) can be generated from it, which would alter if the agreement is later changed. This can act as a check against changes that haven't been agreed to - aka ['Hollywood accounting'](https://en.wikipedia.org/wiki/Hollywood_accounting), so a system using the machine instructions from such a contract for royalty or revenue-share payouts can check it's the same agreement as the one originally agreed to. This is why machine-readable agreements (sometimes used as 'smart contract') alone aren't sufficient - non-developer humans should be able to read the agreement and understand its rules. For this reason [YAML](https://yaml.org/) was chosen over JSON because while it has limitations, it is more easily readable by non-developers.
 
 RSL forms the basis of the Javascript libraries Cascade, Waterfall and the CiviCRM extension suite CiviSplit for Backdrop, Drupal, Joomla! and WordPress.
 
 The syntax has two levels:
  - **a Standard Syntax**, to describe a potentially unlimited series of steps of fixed, percentage or ratio splits, which can loop by both time period or per transaction. This has been implemented in three projects.
- - **an expeerimental Variable Syntax**, still a draft, and not yet implemented, which allows for variables defined elsewhere, for instance an external value for expenses, that allows to exist between certain levels.
+ - **an experimental Variable Syntax**, still a draft, and not yet implemented, which allows for variables defined elsewhere, for instance an external value for expenses, that allows to exist between certain levels.
 
 ## RSL Standard Syntax (release candidate)
 
