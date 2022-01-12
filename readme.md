@@ -256,7 +256,7 @@ steps:
 
 **Copyright & Disclaimer**
 
-Copyright © 2021 Nicol Wistreich under a [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/). With thanks to Rich Lott, Mark Boas, Aidan Saunders, Matthew Wire & Silvia Schmidt.
+Copyright © 2022 Nicol Wistreich under a [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/). With thanks to Rich Lott, Mark Boas, Aidan Saunders, Matthew Wire & Silvia Schmidt.
 
 THIS WORK IS PROVIDED "AS IS," AND COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO, WARRANTIES OF FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SYSTEM OR DOCUMENT WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
 
