@@ -51,6 +51,11 @@ steps:
 - **Contact**: Contact name for the agreement.
 - **Email**: Email address for the contact.
 - **Jurisdiction**: Legal jurisdiction for the agreement, ie which country the agreement is operated from / answerable to. Could be country, region or state.
+- **Period**: When does the agreement reset? If not set, is assumed to run indefinitely, or until the end date. Takes form of '10 transactions', '1 year', '4 weeks', etc, made up of:
+	- A positive integer;
+	- An interval, either 'transaction' sich as per donation, sale or membership; or time period such as day, month, year, etc
+- **Starts**: a starting date for the agreement (YYYY-MM-DD), e.g. 2021-12-31. This can be used with Term to match financial reporting periods.
+- **Ends**: an end date, which allows for a fixed period agreement to stop. 
 - **Steps**: An array of one or more steps, each including an array of one or more payees.
 
 ### Steps:
@@ -129,8 +134,6 @@ These variables can be defined through the URL specified in the header, as a JSO
    ]
 }
 ```
-
-**
 
 ## Examples
 
@@ -294,16 +297,15 @@ steps:
 
 Cascade is an RSL builder:
 
-**Cascade Native** Minimal and framework-free, built by Mark Boas. https://github.com/openvideotech/cascade-native ([demo](https://openvideo.tech/cascade/)).
+**[Cascade Native](https://github.com/openvideotech/cascade-native)** Minimal and framework-free, built by Mark Boas. ([demo](https://openvideo.tech/cascade/)).
 
-**Cascade Svelte** (standalone & civi), realtime responsive (ie RSL generates as you type), building on Native, compiled in Svelte, with unit tests, by Rich Lott. It compiles to two versions for CiviCRM and for standalone. https://github.com/openvideotech/cascade-svelte.
+**[Cascade Svelte](https://github.com/openvideotech/cascade-svelte)** (standalone & civi), realtime responsive (ie RSL generates as you type), building on Native, compiled in Svelte, with unit tests, by Rich Lott. It compiles to two versions for CiviCRM and for standalone.
 
 CiviSplit is an alpha level extension sutie for [CiviCRM](https://civicrm.org) (a comprehensive CRM for WordPress, Drupal, Backdrop & Joomla)
 
-**CiviSplit Agreement Builder** - extension to create, save and generate income sharing agreements in . https://lab.openvideo.tech/civisplit/agreement-builder
+**[CiviSplit Agreement Builder](https://lab.openvideo.tech/civisplit/agreement-builder)** - extension to create, save and generate income sharing agreements in. 
     
-**CiviSplit Processor** - extension to calculate and process amounts owed to different parties. https://lab.openvideo.tech/civisplit/processor
-
+**[CiviSplit Processor](https://lab.openvideo.tech/civisplit/processor)** - extension to calculate and process amounts owed to different parties. 
 
 --- 
 
