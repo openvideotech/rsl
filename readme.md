@@ -1,21 +1,21 @@
 # Revenue Sharing Language (RSL)
 
-Nothing written in this document is offered as legal or financial advice. Use of these ideas or this work is at your own risk. 
+Nothing written in this document is offered as legal or financial advice: use of these ideas and work is at your own risk. 
 
-*v1.0 draft* 
+*v1.0 RC* 
 
-Revenue Sharing Language (RSL)  is a syntax for describing multi-stage revenue sharing agreements between multiple parties. It is proposed as a common vocabulary for instructions that can be generated and processed when creating multi-step recoupment and profit-share agreements that both humans and software can understand.
+Revenue Sharing Language (RSL) is a domain-specific Language (DSL) for describing multi-step revenue sharing agreements between multiple parties. It is proposed as a common vocabulary for such agreements that both humans and software can understand. It is designed to support unlimited steps and payees, loops, caps and either pro rata or pari passu type payouts at each step. 
 
-RSL is a [YAML](https://yaml.org/) subset, which was chosen over JSON for easier readability. It is based on Ian Grigg's idea of a [Ricardian Contract](https://en.wikipedia.org/wiki/Ricardian_contract), a machine- and human- readable agreement. This is similar to a [Smart Contract](https://en.wikipedia.org/wiki/Smart_contract), which also describes a machine-parsable legal agreement and was also first discussed in 1996, but with the difference a human should also be able to read the contract.
+RSL is not designed to implement or process payouts, but to provide the instructions for systems that do. It is also not designed to replace a recoupment contract, but to provide a machine-readable description of a payout structure, recoupment schedule or waterfall that could be appended to a contract, in a way that lawyer or judge could understand. RSL has been tested in implementations described at the bottom of this file.
 
-A benefit of a machine readable contract is that a cryptographic [hash](https://en.wikipedia.org/wiki/SHA-1) can be generated from it, which would change if the agreement later changes, acting as a check against changes that haven't been agreed to by a contract's parties. It also can be embeded into systems to ensure payouts between multiple parties at fixed events such as point of sale.
+Background: RSL is structured as a [YAML](https://yaml.org/) subset, which was chosen over JSON for easier legibility. It is inspired by Ian Grigg's idea of a [Ricardian Contract](https://en.wikipedia.org/wiki/Ricardian_contract), a machine- and human- readable agreement. A benefit of a machine readable contract is that a cryptographic [hash](https://en.wikipedia.org/wiki/SHA-1) can be generated from it, which would change if the agreement later changes, acting as a check against changes that haven't been agreed to by a contract's parties. This is somewhat similar to a [Smart Contract](https://en.wikipedia.org/wiki/Smart_contract), which also describes a machine-parsable legal agreement and was also first discussed in 1996 – with the important difference a human should also be able to read a Ricardian contract. 
 
 ## Syntax
 
-The vocabulary of an RSL agreement requires three elements:
- - **Header**: for the whole *Agreement* and appears once at the top. Only name and Currency is required. It is made up of… 
- - **Step(s)**, can appear unlimited times, and be fixed, percentage or ratio. Steps are paid out sequentially, one after the other. A step is made up of…
- - **Payee(s)**, who can appear unlimited times per step, and need specify amount and an account number. Payees are paid out concurrently, at the same time.
+An RSL agreement is made from three components:
+ - **Header**: appears once for the whole *Agreement*. Only Name and Currency is required. It is made up of… 
+ - **Step(s)**, which can appear unlimited times, and be fixed, percentage or ratio. Steps are paid out *sequentially*, one after the other. A step is made up of…
+ - **Payee(s)**, who can appear unlimited times per step, and need only specify amount and an account reference. Payees are paid out *concurrently*, at the same time.
 
 For e.g. in the example below, an author signs a deal for 25% of net sales (with 10% to her agent) after a £10,000 advance is paid back to her publisher.
 
@@ -71,20 +71,22 @@ An unlabelled, inline array of:
 - **amount**: If fixed this is the fee, if percentage it is the mount (without a percentage symbol). Ratios are expressed only as the numerator (ie '1' for an equal 3-way split) - required.
 - **type** (describes the nature of the pointer, e.g. ILP, AC/sort, Wise, Stripe, Paypal, Ref, ID)
 
-### The difference between fixed and pro rata payouts:
-Payees in each step are paid at the same time but these can be handled in two different ways. If the step is percentage or ratio, each payout is paid out proportionately until the cap is met. If fixed, each payee is paid an equal share with each payout, until all are paid what's owed.
+#### NB: The difference between fixed (pari passu) and %/ratio (pro rata) payouts:
 
-| payee | owed | % | ratio | fixed |
-|-------|------|---|-------|-------|
-|A | €5 | 33.33 | 1 | €5 |
-|B | €10 | 66.66 | 2 | €10 |
-|cap | - | €15 | €15 | - |
+Payees in each step are paid at the same time but these can be handled in two different ways. If the step is percentage or ratio, each payout is paid out proportionately, or pro rata, until the cap is met. If fixed, each payee is paid an equal amount, or pari passu, with each payout, until all are paid what's owed. Fixed steps mean some payees can be fully repaid before others.
 
-If only €6 is received, in the percentage or ratio step, A gets €2 and B gets €4 while with a fixed step, both would get €3. If only €12 was received, the ratio payout would give A €4 and B €8, and the fixed payout would give A €5 and B €7.
+| payee | % | ratio | fixed |
+|-------|---|-------|-------|
+|A - owed €5 | 33.33 | 1 | €5 |
+|B - owed €10 | 66.66 | 2 | €10 |
+|cap | €15 | €15 | - |
 
-### Variable syntax
+If only €6 is received, in the percentage or ratio step, A gets €2 and B gets €4. With a fixed step, both would get €3. 
+If only €12 was received, the ratio/% payout would give A €4 and B €8, and the fixed payout would give A €5 and B €7.
 
-Variable Syntax uses {{double-curly bracketed values}} in a contract to referencevalues that can be set after a revenue share agreement is first agreed. This allows for:
+### Variable Syntax - proposed specification
+
+Variable Syntax is a proposed extension of RSL to use {{double-curly bracketed values}} in a contract to reference values that can be assigned after a revenue sharing agreement is agreed and hashed. It is not yet supported in any of the implementions described below, but would allow for:
 
 1. payouts to be defined after a contract is agreed, for instance expenses that aren't known in advance. E.g. Marketing costs up to 1000 can be deducted in in the step below:
 
@@ -104,15 +106,15 @@ steps:
   -
     type: %  
     payee: 
-      - [{{investor.name}}, {{investor.pointer}}, 40 / N, {{investor.type}} ]
-      - [{{worker.name}}, {{worker.pointer}}, 60 / N, {{worker.type}} ]
+      - [{{investor.name}}, {{investor.pointer}}, {{investor.type}}, 40 / N ]
+      - [{{worker.name}}, {{worker.pointer}}, {{worker.type}}, 60 / N ]
 ```
  
-These variables can be defined through the URL specified in the header, as a JSON object, ie
+These variables can then be defined through a URL specified in the header as a JSON object, ie:
 
 ```
 {
-  "marketingCosts": "123456",
+  "marketingCosts": "850",
   "worker": [
     {
       "name": "Flik",
@@ -173,7 +175,7 @@ steps:
 ```
 
 ### Example 2: distribution agreeement
-A filmmaker allows anyone embedding their film to take 20% of Web Monetization, donations and pay-per-view fees, after the cost of video streaming and a carbon footprint offset, which are split 3:4. 
+A filmmaker allows anyone embedding their film to take 30% of Web Monetization, donations and pay-per-view fees, after the cost of video streaming and a carbon footprint offset, which are split 3:4 up to 50 cents. 
 
 ```
 ---  
@@ -187,7 +189,7 @@ jurisdiction: California, USA
 steps:
   -
     type: ratio
-    cap: 0.30
+    cap: 0.40
     payee:
       - [ "Streaming costs", $fee.example.com, ilp, 3]
       - [ "Ocean forest restoration", $offset.example.com, ilp, 4]
@@ -195,8 +197,8 @@ steps:
     type: percent
     endpoint: celiafilm.example.com
     payeeTemplate:
-      - [ "Celia Bee Da'mil", $example.com/celia, ilp, 80]
-      - [ "{{website.name}}", "{{website.pointer}}", {{website.type}}, 20]
+      - [ "Celia Bee Da'mil", $example.com/celia, ilp, 70]
+      - [ "{{website.name}}", "{{website.pointer}}", {{website.type}}, 30]
 ```
 
 ### Example 3: film profit share
@@ -215,8 +217,8 @@ steps:
   - 
     type: fixed
     payee:
-      - [ "Credit Card", $bank.example.com, ilp, 50000]
-      - [ "Interest", $bank.example.com,  ilp, "{{interest}}"]
+      - [ "Credit Card", 12346678 12345678, IBAN, 50000]
+      - [ "Interest", 12346678 12345678, IBAN, "{{interest}}"]
   -
     type: fixed
     endpoint: deferals.example.com/unpaidsalary
@@ -231,11 +233,11 @@ steps:
       - [ "Composer", $ilp.example.com/clara, ilp, 10]
       - [ "Cinematographer", $ilp.example.com/sven, ilp, 10]
       - [ "Producer", $ilp.example.com/celia-personal, ilp, 25]
-      - [ "Investor", $ilp.example.com/investor, ilp, 25]
+      - [ {{investor.name}}, {{investor.pointer}}, {{investor.type}}, 25 / {{investor.share}} ]
 ```
 
 ### Example 4: filmmaker cooperative
-A group of filmmakers have setup a film studio cooperative  (with apologies to [United Artists](https://en.wikipedia.org/wiki/United_Artists)). They will take an annual founders bonus, then split the profits after expenses equally. It is worth noting that steps two and three are effectively the same, but with Step 3, the addition of Buster Keaton or Lilian Gish to the list of 'owners' at the specified endpoint would change the payout per owner (marked as N) from 25% to 20%.
+A group of filmmakers have setup a film studio cooperative (with apologies to [United Artists](https://en.wikipedia.org/wiki/United_Artists)). They will take an annual founders bonus, then split the profits after expenses equally. It is worth noting that steps two and three are effectively the same, but with Step 3, the addition of Buster Keaton or Lilian Gish to the list of 'owners' at the specified endpoint would change the payout per owner (marked as N) from 25% to 20%.
 
 ```
 ---  
@@ -289,7 +291,7 @@ steps:
     type: percent
     cap: null
     payeeTemplate:
-      - [ "Charity", $ilp.example.org/devcamp, ilp, 50]
+      - [ "Charity", 12346678 12345678, IBAN, 50]
       - [ "{{developer.name}}", "{{developer.pointer}}", {{developer.type}}, 50 / N]
 ```
 
@@ -297,15 +299,17 @@ steps:
 
 Cascade is an RSL builder:
 
-**[Cascade Native](https://github.com/openvideotech/cascade-native)** Minimal and framework-free, built by Mark Boas. ([demo](https://openvideo.tech/cascade/)).
+* **[Cascade Native](https://github.com/openvideotech/cascade-native)** Minimal and framework-free, built by [Mark Boas](https://github.com/maboa). [Demo](https://openvideo.tech/cascade/).
 
-**[Cascade Svelte](https://github.com/openvideotech/cascade-svelte)** (standalone & civi), realtime responsive (ie RSL generates as you type), building on Native, compiled in Svelte, with unit tests, by Rich Lott. It compiles to two versions for CiviCRM and for standalone.
+* **[Cascade Svelte](https://github.com/openvideotech/cascade-svelte)** (standalone & civi), realtime responsive (ie RSL generates as you type), building on Native, compiled in Svelte, with unit tests, built by [Rich Lott](https://github.com/artfulrobot/). It compiles to two versions for CiviCRM and for standalone. [Demo](https://openvideo.tech/cascade-svelte/).
 
 CiviSplit is an alpha level extension sutie for [CiviCRM](https://civicrm.org) (a comprehensive CRM for WordPress, Drupal, Backdrop & Joomla)
 
-**[CiviSplit Agreement Builder](https://lab.openvideo.tech/civisplit/agreement-builder)** - extension to create, save and generate income sharing agreements in. 
+* **[CiviSplit Agreement Builder](https://lab.openvideo.tech/civisplit/agreement-builder)** - extension to create, save and generate income sharing agreements in with reporting.
     
-**[CiviSplit Processor](https://lab.openvideo.tech/civisplit/processor)** - extension to calculate and process amounts owed to different parties. 
+* **[CiviSplit Processor](https://lab.openvideo.tech/civisplit/processor)** - extension to calculate and process amounts owed to different parties, handling incomplete payments.
+
+* **CiviSplit Uphold** - payment processor integrating with Uphold.
 
 --- 
 
