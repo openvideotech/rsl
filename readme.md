@@ -1,69 +1,30 @@
 # Revenue Sharing Language (RSL)
 
-*v0.8*
+Nothing written in this document is offered as legal or financial advice: use of these ideas and work is at your own risk. 
 
-RSL is a proposed syntax for describing revenue sharing agreements between multiple parties using [YAML](https://yaml.org/). 
+*v1.0 RC* 
 
-Revenue Sharing Language (RSL) is inspired by Ian Grigg's idea of a [Ricardian Contract](https://en.wikipedia.org/wiki/Ricardian_contract), which is a machine- and human- readable agreement. A Ricardian Contract for revenue sharing has the advantages of potentially reducing human error, delays or 'creative adjustments' when an agreement is paid out. RSL is proposed as a common set of instructions that can be generated and processed when creating multi-step recoupment and profit-share agreements. 
+Revenue Sharing Language (RSL) is a domain-specific Language (DSL) for describing multi-step revenue sharing agreements between multiple parties. It is proposed as a common vocabulary for such agreements that both humans and software can understand. It is designed to support unlimited steps and payees, loops, caps and either pro rata or pari passu type payouts at each step. 
 
-One of the main benefits of a human and machine readable contract is that a cryptographic [SHA hash](https://en.wikipedia.org/wiki/SHA-1) can be generated from it, which would alter if the agreement is later changed. This can act as a check against changes that haven't been agreed to - aka ['Hollywood accounting'](https://en.wikipedia.org/wiki/Hollywood_accounting), so a system using the machine instructions from such a contract for royalty or revenue-share payouts can check it's the same agreement as the one originally agreed to. This is why machine-readable agreements (sometimes used as 'smart contract') alone aren't sufficient - non-developer humans should be able to read the agreement and understand its rules. For this reason [YAML](https://yaml.org/) was chosen over JSON because while it has limitations, it is more easily readable by non-developers.
+RSL is not designed to implement or process payouts, but to provide the instructions for systems that do. It is also not designed to replace a recoupment contract, but to provide a machine-readable description of a payout structure, recoupment schedule or waterfall that could be appended to a contract, in a way that lawyer or judge could understand. RSL has been tested in implementations described at the bottom of this file.
 
-RSL forms the basis of the Javascript libraries Cascade, Waterfall and the CiviCRM extension suite CiviSplit for Backdrop, Drupal, Joomla! and WordPress.
+Background: RSL is structured as a [YAML](https://yaml.org/) subset, which was chosen over JSON for easier legibility. It is inspired by Ian Grigg's idea of a [Ricardian Contract](https://en.wikipedia.org/wiki/Ricardian_contract), a machine- and human- readable agreement. A benefit of a machine readable contract is that a cryptographic [hash](https://en.wikipedia.org/wiki/SHA-1) can be generated from it, which would change if the agreement later changes, acting as a check against changes that haven't been agreed to by a contract's parties. This is somewhat similar to a [Smart Contract](https://en.wikipedia.org/wiki/Smart_contract), which also describes a machine-parsable legal agreement and was also first discussed in 1996 – with the important difference a human should also be able to read a Ricardian contract. 
 
-The syntax has two levels:
- - **a Standard Syntax**, to describe a potentially unlimited series of steps of fixed, percentage or ratio splits, which can loop by both time period or per transaction. This has been implemented in three projects.
- - **an experimental Variable Syntax**, still a draft, and not yet implemented, which allows for variables defined elsewhere, for instance an external value for expenses, that allows to exist between certain levels.
+## Syntax
 
-## RSL Standard Syntax (release candidate)
+An RSL agreement is made from three components:
+ - **Header**: appears once for the whole *Agreement*. Only Name and Currency is required. It is made up of… 
+ - **Step(s)**, which can appear unlimited times, and be fixed, percentage or ratio. Steps are paid out *sequentially*, one after the other. A step is made up of…
+ - **Payee(s)**, who can appear unlimited times per step, and need only specify amount and an account reference. Payees are paid out *concurrently*, at the same time.
 
-An RSL agreement features three components:
- - Data for the whole **Agreement**, which appears once, and of which only Name and Currency is required.
- - Data for a **Step** in the agreement which can appear multiple times, and of which only Type (fixed, ratio or percentage) is required. A step will contain one or more Payees.
- - Data for a **Payee**, who can  appear multiple times per step, and of which only amount and wallet is required.
-
-### Data for the agreement
-- **Name**: 256 chars max - *REQUIRED*.
-- **Currency**: (three letter [ISO currency](https://en.wikipedia.org/wiki/ISO_4217) or [crypto](https://www.finder.com.au/cryptocurrency/altcoins) code) - *REQUIRED*.
-- **Decimals**: comma (,), period (.) or none. Determines if decimal places in currency ammounts are denoted with '.' or ',' or (as is the case with currencies such as Yen) no decimal places. If not set, period (.) is assumed.
-- **RSL**: which RSL version is used (e.g. 0.6). This allows for future changes in RSL syntax to not break on older RSL files.
-- **Description**.
-- **Period**: When does the agreement reset? If not set is assumed to run indefinitely, or until the end date. Takes form of '10 transactions', '1 year', '4 weeks', etc, made up of:
-	- A positive integer;
-	- An interval, either 'transaction' sich as per donation, sale or membership; or time period such as day, month, year, etc
-- **Starts**: a starting date for the agreement (YYYY-MM-DD), e.g. 2021-12-31. This can be used with Term to match financial reporting periods.
-- **Ends**: an end date, which allows for a fixed period agreement to stop. 
-- **Pointer**: following the idea of [Payment Pointers](https://paymentpointers.org/), this references a wallet, bank account, collecting society or escrow account that will receive the initial funds this agreement relates to. 
-- **URL**: A public address for the agreement.
-- **Contact**: Contact name for the agreement.
-- **Email**: Email address for the contact.
-- **Jurisdiction**: Legal jurisdiction for the agreement, ie which country the agreement is operated from / answerable to. Could be country, region or state.
-- **Steps**: An array of steps
-
-### Data for a step in the agreement, numbered sequentially:
-- **Type**:  fixed, percent or ratio. Ratios are an alternative to percent, helpful for splits with recurring decimals when expressed as a % - *REQUIRED*.
-- **Description**:
-- **Cap**: for percentage payouts, a max payout before moving to the next step. ‘null’, or unset indicates distribution runs indefinitely.
-- **Payee**: an array for payees, containing:
-	- **name**;
-	- **pointer**: [Payment pointer](https://paymentpointers.org/), bank account/sortcode, IBAN, Swift, email, dbse ID, etc) - *REQUIRED*;
-	- **amount**: If fixed this is the fee, if percentage it is the mount (without a percentage symbol). Ratios are expressed only as the numerator (ie '1' for an equal 3-way split) - required.
-	- **type** (describes the nature of the pointer, e.g. ILP, AC/sort, Wise, Stripe, Paypal, Ref, ID)
-
-### Notes:
-- payees in each step are paid at the same time, ['pari passu'](https://en.wikipedia.org/wiki/Pari_passu) until all are paid.
-- if payees are in a percentage step but don’t add up to 100, the processor must transform them into a % of their sum.
-
-### Example 1
-An author signs a deal for 25% of net sales (with 10% to her agent) after a £10,000 advance is paid back to the publisher. To return the advance, the first step (step1) pays only the publisher until the 25% net figure is reached, ie when the publisher has earned £40,000.
+For e.g. in the example below, an author signs a deal for 25% of net sales (with 10% to her agent) after a £10,000 advance is paid back to her publisher.
 
 ```
 ---
 name: "Best of times, Worst of times"
 rsl version: 1.0
 description: "Book deal for the new novel by Charlene Dickens"
-url: example.com/248mc0u3489mc
-currency: GBP
-decimals: period
+currency: EUR
 steps:
   -
     type: fixed
@@ -77,7 +38,108 @@ steps:
       - ["PRNG House", $ilp.example.com, ilp, dbse, 75 ]
 ```
 
-### Example 2
+## Full syntax
+
+### Header
+- **Name**: 256 chars max - *REQUIRED*.
+- **Currency**: (three letter [ISO currency](https://en.wikipedia.org/wiki/ISO_4217) or [crypto](https://www.finder.com.au/cryptocurrency/altcoins) code) - *REQUIRED*.
+- **Decimals**: comma (,), period (.) or none. Determines if decimal places in currency ammounts are denoted with '.' or ',' or (as is the case with currencies such as Yen) no decimal places. If not set, period (.) is assumed.
+- **RSL**: which RSL version is used (e.g. 0.6, 1.0). This allows for future changes in RSL syntax to not break on older RSL files.
+- **Description**.
+- **Pointer**: following the idea of [Payment Pointers](https://paymentpointers.org/), this references a wallet, bank account, collecting society or escrow account that will receive the initial funds this agreement relates to. 
+- **URL**: A public address for the agreement. This should include the values for any variable items.
+- **Contact**: Contact name for the agreement.
+- **Email**: Email address for the contact.
+- **Jurisdiction**: Legal jurisdiction for the agreement, ie which country the agreement is operated from / answerable to. Could be country, region or state.
+- **Period**: When does the agreement reset? If not set, is assumed to run indefinitely, or until the end date. Takes form of '10 transactions', '1 year', '4 weeks', etc, made up of:
+	- A positive integer;
+	- An interval, either 'transaction' sich as per donation, sale or membership; or time period such as day, month, year, etc
+- **Starts**: a starting date for the agreement (YYYY-MM-DD), e.g. 2021-12-31. This can be used with Term to match financial reporting periods.
+- **Ends**: an end date, which allows for a fixed period agreement to stop. 
+- **Steps**: An array of one or more steps, each including an array of one or more payees.
+
+### Steps:
+- **Type**:  fixed, percent or ratio. Ratios are an alternative to percent, helpful for splits with recurring decimals when expressed as a % - *REQUIRED*.
+- **Description**:
+- **Cap**: for percentage payouts, a max payout before moving to the next step. ‘null’, or unset indicates distribution runs indefinitely.
+- **Payee**: an array for payees, 
+
+### Payees
+An unlabelled, inline array of:
+- **name**;
+- **pointer**: [Payment pointer](https://paymentpointers.org/), bank account/sortcode, IBAN, Swift, email, dbse ID, etc) - *REQUIRED*;
+- **amount**: If fixed this is the fee, if percentage it is the mount (without a percentage symbol). Ratios are expressed only as the numerator (ie '1' for an equal 3-way split) - required.
+- **type** (describes the nature of the pointer, e.g. ILP, AC/sort, Wise, Stripe, Paypal, Ref, ID)
+
+#### NB: The difference between fixed (pari passu) and %/ratio (pro rata) payouts:
+
+Payees in each step are paid at the same time but these can be handled in two different ways. If the step is percentage or ratio, each payout is paid out proportionately, or pro rata, until the cap is met. If fixed, each payee is paid an equal amount, or pari passu, with each payout, until all are paid what's owed. Fixed steps mean some payees can be fully repaid before others.
+
+| payee | % | ratio | fixed |
+|-------|---|-------|-------|
+|A - owed €5 | 33.33 | 1 | €5 |
+|B - owed €10 | 66.66 | 2 | €10 |
+|cap | €15 | €15 | - |
+
+If only €6 is received, in the percentage or ratio step, A gets €2 and B gets €4. With a fixed step, both would get €3. 
+If only €12 was received, the ratio/% payout would give A €4 and B €8, and the fixed payout would give A €5 and B €7.
+
+### Variable Syntax - proposed specification
+
+Variable Syntax is a proposed extension of RSL to use {{double-curly bracketed values}} in a contract to reference values that can be assigned after a revenue sharing agreement is agreed and hashed. It is not yet supported in any of the implementions described below, but would allow for:
+
+1. payouts to be defined after a contract is agreed, for instance expenses that aren't known in advance. E.g. Marketing costs up to 1000 can be deducted in in the step below:
+
+```
+steps:
+  -
+    type: fixed  
+    cap: 1000
+    payee: 
+      - [“Marketing costs”, 12345678 / 12-34-56, Wise, {{marketingCosts}} ]
+```
+
+2. payees to be defined after a contract is agreed, for instance cooperative members, resellers or distributors. E.g. below 40% of income is split equally between all investors, and 60% between all workers, regardless how many new investors and workers join after the contract is first agreed.
+
+```
+steps:
+  -
+    type: %  
+    payee: 
+      - [{{investor.name}}, {{investor.pointer}}, {{investor.type}}, 40 / N ]
+      - [{{worker.name}}, {{worker.pointer}}, {{worker.type}}, 60 / N ]
+```
+ 
+These variables can then be defined through a URL specified in the header as a JSON object, ie:
+
+```
+{
+  "marketingCosts": "850",
+  "worker": [
+    {
+      "name": "Flik",
+      "pointer": "12345678",
+      "type": "IBAN"
+    },
+    {
+      "name": "Atta",
+      "pointer": "name@example.org",
+      "type": "paypal"
+    },
+  ],
+  "investor": [
+    {
+      "name": "PT Flea",
+      "pointer": "ilp.example.org/123456",
+      "type": "ILP"
+      }
+   ]
+}
+```
+
+## Examples
+
+### Example 1: record publishing deal
 After paying their record label and producer, band members split income from their album up to $1m equally, and give the remainder to charity.
 
 ```
@@ -112,37 +174,22 @@ steps:
       - [ "Unicef", $ilp.example.org/unicef, ilp, 100 ]
 ```
 
-## RSL Variable Syntax (draft)
-
-Variable Syntax uses {{double -curly bracketed values}} in a contract, which will change after a revenue share agreement is first created. For instance annual expenses which must be deducted before profits are shared; or cooperative members when new members are joining all the time. 
-
-As well as allowing for {{double bracketed}} reference points which can be changed after a contract has been generated, this would require further lines to be supported in the YAML:
-
-### Additional variables for a step in the agreement:
-- *Endpoint*: A url for the API to resolve the variables used in that step.
-- *Key*: If the API endpoint requires a key to access the values.
-- payeeTemplate: a generic array for that can resolve as new payees are added. An additional value is used to describe the list containing:
-	- {{name_of_group.name}} (e.g. {{worker_owners.name}}, {{user_owners.name}}, {{investors.name}} - would each point to a different lists of payees)
-	- {{name_of_group.pointer}}
-	- {{name_of_group.payout}} or just N for an equally split percentage share.
-	- {{name_of_group.type}}
-
-### Example 3
-A filmmaker allows anyone embedding their film to take 20% of Web Monetization, donations and pay-per-view fees, after the cost of video streaming and a carbon footprint offset, which are split 3:4. 
+### Example 2: distribution agreeement
+A filmmaker allows anyone embedding their film to take 30% of Web Monetization, donations and pay-per-view fees, after the cost of video streaming and a carbon footprint offset, which are split 3:4 up to 50 cents. 
 
 ```
 ---  
 name: “Film distribution share”
 rsl: 1.0
 description: “Profit share for video embeds”
-url: ilp.example.com/name
+url: deal.example.com/name
 currency: USD
 period: 1 transaction
 jurisdiction: California, USA
 steps:
   -
     type: ratio
-    cap: 0.30
+    cap: 0.40
     payee:
       - [ "Streaming costs", $fee.example.com, ilp, 3]
       - [ "Ocean forest restoration", $offset.example.com, ilp, 4]
@@ -150,11 +197,11 @@ steps:
     type: percent
     endpoint: celiafilm.example.com
     payeeTemplate:
-      - [ "Celia Bee Da'mil", $example.com/celia, ilp, 80]
-      - [ "{{website}}", "{{pointer}}", ilp, 20]
+      - [ "Celia Bee Da'mil", $example.com/celia, ilp, 70]
+      - [ "{{website.name}}", "{{website.pointer}}", {{website.type}}, 30]
 ```
 
-### Example 4
+### Example 3: film profit share
 Following on from the above example; when the filmmaker receives income from websites embedding her film, she will first pay back her credit card; then deferred salaries & her expenses; then a profit share with the cast and crew and investors.
 
 ```
@@ -162,21 +209,19 @@ Following on from the above example; when the filmmaker receives income from web
 name: “Film income share”
 rsl: 1.0
 description: “Profit share for feature film”
-url: $example.com/celia
+url: $deal.example.com/celia
 currency: USD
 contact: Celia Bee Da'mil
 jurisdiction: California, USA
 steps:
   - 
     type: fixed
-    endpoint: bank.example.com/interest
     payee:
-      - [ "Credit Card", $bank.example.com, ilp, 50000]
-      - [ "Interest", $bank.example.com,  ilp, "{{interest}}"]
+      - [ "Credit Card", 12346678 12345678, IBAN, 50000]
+      - [ "Interest", 12346678 12345678, IBAN, "{{interest}}"]
   -
     type: fixed
     endpoint: deferals.example.com/unpaidsalary
-    key: 10923m10293mix
     payeeTemplate: 
       - [ "{{deferal.name}}", "{{deferal.pointer}}", "{{deferal.type}}", "{{deferal.amount}}"]
   -
@@ -188,11 +233,11 @@ steps:
       - [ "Composer", $ilp.example.com/clara, ilp, 10]
       - [ "Cinematographer", $ilp.example.com/sven, ilp, 10]
       - [ "Producer", $ilp.example.com/celia-personal, ilp, 25]
-      - [ "Investor", $ilp.example.com/investor, ilp, 25]
+      - [ {{investor.name}}, {{investor.pointer}}, {{investor.type}}, 25 / {{investor.share}} ]
 ```
 
-### Example 5
-A group of filmmakers have setup a film studio cooperative  (with apologies to [United Artists](https://en.wikipedia.org/wiki/United_Artists)). They will take an annual founders bonus, then split the profits after expenses equally. It is worth noting that steps two and three are effectively the same, but with Step 3, the addition of Buster Keaton or Lilian Gish to the list of 'owners' at the specified endpoint would change the payout per owner (marked as N) from 25% to 20%.
+### Example 4: filmmaker cooperative
+A group of filmmakers have setup a film studio cooperative (with apologies to [United Artists](https://en.wikipedia.org/wiki/United_Artists)). They will take an annual founders bonus, then split the profits after expenses equally. It is worth noting that steps two and three are effectively the same, but with Step 3, the addition of Buster Keaton or Lilian Gish to the list of 'owners' at the specified endpoint would change the payout per owner (marked as N) from 25% to 20%.
 
 ```
 ---  
@@ -206,8 +251,6 @@ period: 1 year
 steps:
   -
     type: fixed  
-    endpoint: au.example.com/costs
-    key: 203984c20934m0c29348
     payee: 
       - [ "Annual expenses", ID002, dbse, "{{costs}}" ]
   -
@@ -221,36 +264,52 @@ steps:
       - [ "Fairbanks", $payee.example.com/douglass, ilp, 25]
   -
     type: percent
-    endpoint: au.example.com/owners
     payeeTemplate: 
-      - [ {{owners.name}}, {{owners.pointer}}, ilp, N ]
+      - [ {{owners.name}}, {{owners.pointer}}, {{owners.type}}, N ]
 ```
 
-### Example 6
+### Example 5: per sale redistribution
 A charity helps developers give coding lessons in refugee camps around the world, and sells the apps and games created. Each student developer gets a fee per sale; what's left is split between the charity and all developers for that year.
+
+NB, in this example, an additional 'this' term is added to the first step payee to indicate a single payee relvent to *this* specific transaction. In the second step, all developers are included.
 
 ```
 ---  
 name: “Dev Camp”  
 rsl: 1.0
 description: “Profit share for trainee developers”
+url: transactions.example.com/developers
 currency: JPY
 decimals: none
 period: 1 transaction
 steps:
   - 
     type: fixed
-    endpoint: transactions.example.com/developers
     payeeTemplate:
-      - [ "{{developer.name}}", "{{pointer}}", ilp, 1000]
+      - [ "{{this.developer.name}}", "{{this.developer.pointer}}", {{this.developer.type}}, 1000]
   -
     type: percent
     cap: null
-    endpoint: devcamp.example.org/all_developers
     payeeTemplate:
-      - [ "Charity", $ilp.example.org/devcamp, ilp, 50]
-      - [ "{{all_developers.name}}", "{{all_developers.name}}", ilp, N]
+      - [ "Charity", 12346678 12345678, IBAN, 50]
+      - [ "{{developer.name}}", "{{developer.pointer}}", {{developer.type}}, 50 / N]
 ```
+
+## Implementations
+
+Cascade is an RSL builder:
+
+* **[Cascade Native](https://github.com/openvideotech/cascade-native)** Minimal and framework-free, built by [Mark Boas](https://github.com/maboa). [Demo](https://openvideo.tech/cascade/).
+
+* **[Cascade Svelte](https://github.com/openvideotech/cascade-svelte)** (standalone & civi), realtime responsive (ie RSL generates as you type), building on Native, compiled in Svelte, with unit tests, built by [Rich Lott](https://github.com/artfulrobot/). It compiles to two versions for CiviCRM and for standalone. [Demo](https://openvideo.tech/cascade-svelte/).
+
+CiviSplit is an alpha level extension sutie for [CiviCRM](https://civicrm.org) (a comprehensive CRM for WordPress, Drupal, Backdrop & Joomla)
+
+* **[CiviSplit Agreement Builder](https://lab.openvideo.tech/civisplit/agreement-builder)** - extension to create, save and generate income sharing agreements in with reporting.
+    
+* **[CiviSplit Processor](https://lab.openvideo.tech/civisplit/processor)** - extension to calculate and process amounts owed to different parties, handling incomplete payments.
+
+* **CiviSplit Uphold** - payment processor integrating with Uphold.
 
 --- 
 
